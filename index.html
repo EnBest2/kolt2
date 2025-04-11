@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff4d4d">
+    <title>Költségfigyelő</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192x192.png">
+    <style>
+        /* Alap CSS */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ff6f61, #d45d5d);
+            color: white;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        .category {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        .category div {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            width: 20%;
+        }
+        .category div i {
+            font-size: 2em;
+        }
+        button {
+            margin-top: 20px;
+            background-color: #ff4d4d;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #e04646;
+        }
+        .entries {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .entry {
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+        .entry p {
+            margin: 0;
+        }
+        .date {
+            font-size: 0.8em;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Költségfigyelő</h1>
+    
+    <div class="category">
+        <div>
+            <i class="fas fa-wallet"></i>
+            <p>Bevételek</p>
+            <button onclick="addIncome()">Bevitel</button>
+        </div>
+        <div>
+            <i class="fas fa-credit-card"></i>
+            <p>Kiadások</p>
+            <button onclick="addExpense()">Bevitel</button>
+        </div>
+        <div>
+            <i class="fas fa-piggy-bank"></i>
+            <p>Megtakarítások</p>
+            <button onclick="addSavings()">Bevitel</button>
+        </div>
+    </div>
+
+    <h2>Adatok</h2>
+    <div class="entries">
+        <div id="incomeEntries"></div>
+        <div id="expenseEntries"></div>
+        <div id="savingsEntries"></div>
+    </div>
+
+    <button onclick="downloadReport()">Letöltés ZIP-ben</button>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script>
+        const incomeEntries = [];
+        const expenseEntries = [];
+        const savingsEntries = [];
+
+        function addIncome() {
+            const amount = prompt("Add meg a bevételt:");
+            const date = new Date().toLocaleDateString();
+            incomeEntries.push({ amount, date });
+            renderEntries();
+        }
+
+        function addExpense() {
+            const amount = prompt("Add meg a kiadást:");
+            const date = new Date().toLocaleDateString();
+            expenseEntries.push({ amount, date });
+            renderEntries();
+        }
+
+        function addSavings() {
+            const amount = prompt("Add meg a megtakarítást:");
+            const date = new Date().toLocaleDateString();
+            savingsEntries.push({ amount, date });
+            renderEntries();
+        }
+
+        function renderEntries() {
+            const incomeDiv = document.getElementById("incomeEntries");
+            const expenseDiv = document.getElementById("expenseEntries");
+            const savingsDiv = document.getElementById("savingsEntries");
+
+            incomeDiv.innerHTML = "<h3>Bevételek</h3>" + incomeEntries.map(entry => 
+                `<div class="entry"><p>Bevétel: ${entry.amount} Ft</p><p class="date">${entry.date}</p></div>`
+            ).join("");
+
+            expenseDiv.innerHTML = "<h3>Kiadások</h3>" + expenseEntries.map(entry => 
+                `<div class="entry"><p>Kiadás: ${entry.amount} Ft</p><p class="date">${entry.date}</p></div>`
+            ).join("");
+
+            savingsDiv.innerHTML = "<h3>Megtakarítások</h3>" + savingsEntries.map(entry => 
+                `<div class="entry"><p>Megtakarítás: ${entry.amount} Ft</p><p class="date">${entry.date}</p></div>`
+            ).join("");
+        }
+
+        function downloadReport() {
+            const zip = new JSZip();
+
+            zip.file("income.json", JSON.stringify(incomeEntries));
+            zip.file("expenses.json", JSON.stringify(expenseEntries));
+            zip.file("savings.json", JSON.stringify(savingsEntries));
+
+            zip.generateAsync({ type: "blob" }).then(function(content) {
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(content);
+                link.download = "költségfigyelő_kimutatások.zip";
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
